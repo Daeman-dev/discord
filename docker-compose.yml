@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  bot:
+    build: .
+    container_name: discord-bot-V1.0
+    environment:
+      - BOT_TOKEN=${BOT_TOKEN}
+      - BIRTHDAY_ROLE_ID=${BIRTHDAY_ROLE_ID}
+      - CHANNEL_ID=${CHANNEL_ID}
+      - USERS_TO_MENTION=${USERS_TO_MENTION}
+      - DATABASE_FILE=${DATABASE_FILE}
+    volumes:
+      - ./data:/app/data  # Сохраняем данные SQLite на хосте
+    restart: unless-stopped
