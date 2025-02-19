@@ -20,7 +20,7 @@ DATABASE_FILE = os.getenv("DATABASE_FILE", "data/bot_database.db")  # Путь �
 # Настройка intents (намерений) для бота
 intents = discord.Intents.default()
 intents.message_content = True  # Включаем доступ к содержимому сообщений
-intents.members = True  # Включаем доступ к информации о участниках сервера
+intents.members = True  # Включаем доступ к информации об участниках сервера
 
 # Создаем экземпляр бота
 bot = discord.Bot(intents=intents)
