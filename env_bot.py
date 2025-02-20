@@ -1,11 +1,14 @@
 import discord
 from discord import Option
+from discord.ext import commands
 import schedule
+import time
 import asyncio
 from datetime import datetime, timedelta
 import sqlite3
 import random
 import os
+from typing import List
 
 # Загрузка переменных окружения
 BOT_TOKEN = os.getenv("BOT_TOKEN")
@@ -17,7 +20,7 @@ DATABASE_FILE = os.getenv("DATABASE_FILE", "data/bot_database.db")  # Путь �
 # Настройка intents (намерений) для бота
 intents = discord.Intents.default()
 intents.message_content = True  # Включаем доступ к содержимому сообщений
-intents.members = True  # Включаем доступ к информации об участниках сервера
+intents.members = True  # Включаем доступ к информации о участниках сервера
 
 # Создаем экземпляр бота
 bot = discord.Bot(intents=intents)
@@ -39,6 +42,15 @@ def init_db():
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 title TEXT NOT NULL,
                 watched INTEGER DEFAULT 0
+            )
+        """)
+         # Таблица для времени пробуждения
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS wake_up_times (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                wake_up_time TEXT NOT NULL, 
+                wake_up_date TEXT NOT NULL   
             )
         """)
         conn.commit()
@@ -214,13 +226,164 @@ async def list_watched_movies(ctx: discord.ApplicationContext):
         message = "**Просмотренные фильмы:**\n"
         message += "\n".join([title for title, in movies])
         await ctx.respond(message)
+# Команда для времени просыпания
+@bot.slash_command(
+    name="япроснулся",
+    description="Записать время пробуждения."
+)
+async def wake_up(ctx: discord.ApplicationContext):
+    """
+    Записывает время пробуждения пользователя в базу данных.
+    """
+    user_id = ctx.author.id
+    wake_up_time = datetime.now().strftime("%H:%M")  # Время в формате "ЧЧ:ММ"
+    wake_up_date = datetime.now().strftime("%Y-%m-%d")  # Дата в формате "ГГГГ-ММ-ДД"
+
+    with sqlite3.connect(DATABASE_FILE) as conn:
+        cursor = conn.cursor()
+        # Добавляем запись о времени пробуждения
+        cursor.execute("""
+            INSERT INTO wake_up_times (user_id, wake_up_time, wake_up_date)
+            VALUES (?, ?, ?)
+        """, (user_id, wake_up_time, wake_up_date))
+        conn.commit()
+
+    await ctx.respond(f"Время пробуждения записано: {wake_up_time}")
+
+
+# Команда вывода статистики
+@bot.slash_command(
+    name="статистика",
+    description="Показать статистику пробуждений за текущую неделю."
+)
+async def show_statistics(ctx: discord.ApplicationContext):
+    """
+    Выводит статистику пробуждений за текущую неделю.
+    """
+    # Получаем начало и конец текущей недели
+    today = datetime.now()
+    start_of_week = (today - timedelta(days=today.weekday())).strftime("%Y-%m-%d")  # Понедельник
+    end_of_week = (today + timedelta(days=6 - today.weekday())).strftime("%Y-%m-%d")  # Воскресенье
+
+    with sqlite3.connect(DATABASE_FILE) as conn:
+        cursor = conn.cursor()
+        # Получаем данные за текущую неделю
+        cursor.execute("""
+            SELECT user_id, wake_up_time
+            FROM wake_up_times
+            WHERE wake_up_date BETWEEN ? AND ?
+        """, (start_of_week, end_of_week))
+        results = cursor.fetchall()
+
+        if not results:
+            await ctx.respond("На этой неделе ещё никто не просыпался!")
+            return
+
+        # Группируем данные по пользователям
+        user_data = {}
+        for user_id, wake_up_time in results:
+            if user_id not in user_data:
+                user_data[user_id] = []
+            user_data[user_id].append(wake_up_time)
+
+        # Формируем таблицу
+        table = "```\n"
+        table += "Имя пользователя | Среднее время | Самое позднее | Самое раннее\n"
+        table += "-" * 60 + "\n"
+
+        for user_id, times in user_data.items():
+            # Преобразуем время в минуты для вычислений
+            times_in_minutes = [int(t.split(":")[0]) * 60 + int(t.split(":")[1]) for t in times]
+
+            # Вычисляем среднее, самое позднее и самое раннее время
+            avg_time = sum(times_in_minutes) / len(times_in_minutes)
+            latest_time = max(times_in_minutes)
+            earliest_time = min(times_in_minutes)
+
+            # Преобразуем минуты обратно в формат "ЧЧ:ММ"
+            def minutes_to_time(minutes):
+                return f"{int(minutes // 60):02d}:{int(minutes % 60):02d}"
+
+            # Получаем имя пользователя
+            user = await bot.fetch_user(user_id)
+            username = user.name
+
+            # Добавляем строку в таблицу
+            table += f"{username:<16} | {minutes_to_time(avg_time):<13} | {minutes_to_time(latest_time):<14} | {minutes_to_time(earliest_time)}\n"
+
+        table += "```"
+        await ctx.respond(table)
+
+async def send_weekly_statistics():
+    """
+    Отправляет статистику пробуждений за неделю.
+    """
+    channel = bot.get_channel(CHANNEL_ID)  # Канал для отправки статистики
+    if not channel:
+        print("Канал для статистики не найден!")
+        return
+
+    # Получаем начало и конец текущей недели
+    today = datetime.now()
+    start_of_week = (today - timedelta(days=today.weekday())).strftime("%Y-%m-%d")  # Понедельник
+    end_of_week = (today + timedelta(days=6 - today.weekday())).strftime("%Y-%m-%d")  # Воскресенье
+
+    with sqlite3.connect(DATABASE_FILE) as conn:
+        cursor = conn.cursor()
+        # Получаем данные за текущую неделю
+        cursor.execute("""
+            SELECT user_id, wake_up_time
+            FROM wake_up_times
+            WHERE wake_up_date BETWEEN ? AND ?
+        """, (start_of_week, end_of_week))
+        results = cursor.fetchall()
+
+        if not results:
+            await channel.send("На этой неделе ещё никто не просыпался!")
+            return
+
+        # Группируем данные по пользователям
+        user_data = {}
+        for user_id, wake_up_time in results:
+            if user_id not in user_data:
+                user_data[user_id] = []
+            user_data[user_id].append(wake_up_time)
+
+        # Формируем таблицу
+        table = "```\n"
+        table += "Имя пользователя | Среднее время | Самое позднее | Самое раннее\n"
+        table += "-" * 60 + "\n"
+
+        for user_id, times in user_data.items():
+            # Преобразуем время в минуты для вычислений
+            times_in_minutes = [int(t.split(":")[0]) * 60 + int(t.split(":")[1]) for t in times]
+
+            # Вычисляем среднее, самое позднее и самое раннее время
+            avg_time = sum(times_in_minutes) / len(times_in_minutes)
+            latest_time = max(times_in_minutes)
+            earliest_time = min(times_in_minutes)
+
+            # Преобразуем минуты обратно в формат "ЧЧ:ММ"
+            def minutes_to_time(minutes):
+                return f"{int(minutes // 60):02d}:{int(minutes % 60):02d}"
+
+            # Получаем имя пользователя
+            user = await bot.fetch_user(user_id)
+            username = user.name
+
+            # Добавляем строку в таблицу
+            table += f"{username:<16} | {minutes_to_time(avg_time):<13} | {minutes_to_time(latest_time):<14} | {minutes_to_time(earliest_time)}\n"
+
+        table += "```"
+        await channel.send(f"**Статистика пробуждений за неделю:**\n{table}")
 
 # Задача для выполнения каждый день в определённое время
 def schedule_daily_tasks():
     # Укажите время в формате "HH:MM" (например, "09:00")
-    schedule.every().day.at("08:30").do(lambda: asyncio.create_task(send_mentions()))
+    schedule.every().day.at("06:00").do(lambda: asyncio.create_task(send_mentions()))
     schedule.every().day.at("00:00").do(lambda: asyncio.create_task(check_birthdays()))  # Проверка в полночь
     schedule.every().day.at("00:00").do(lambda: asyncio.create_task(remove_birthday_roles()))  # Проверка в полночь
+    schedule.every().sunday.at("12:00").do(lambda: asyncio.create_task(send_weekly_statistics())) # Проверка на воскресенье и отправку статистики
 
 # Событие, которое срабатывает при успешном запуске бота
 @bot.event
