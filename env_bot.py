@@ -1,14 +1,11 @@
 import discord
 from discord import Option
-from discord.ext import commands
 import schedule
-import time
 import asyncio
 from datetime import datetime, timedelta
 import sqlite3
 import random
 import os
-from typing import List
 
 # Загрузка переменных окружения
 BOT_TOKEN = os.getenv("BOT_TOKEN")
