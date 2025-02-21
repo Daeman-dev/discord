@@ -38,8 +38,8 @@ async def show_statistics(ctx: discord.ApplicationContext, bot):
 
         # Формируем таблицу
         table = "```\n"
-        table += "Имя пользователя | Среднее время | Самое позднее | Самое раннее\n"
-        table += "-" * 60 + "\n"
+        table += "Имя пользователя | Среднее время | Самое позднее | Самое раннее | Медиана\n"
+        table += "-" * 80 + "\n"
 
         for user_id, times in user_data.items():
             # Преобразуем время в минуты для вычислений
@@ -49,6 +49,7 @@ async def show_statistics(ctx: discord.ApplicationContext, bot):
             avg_time = sum(times_in_minutes) / len(times_in_minutes)
             latest_time = max(times_in_minutes)
             earliest_time = min(times_in_minutes)
+            median_time = sorted(times_in_minutes)[len(times_in_minutes) // 2]
 
             # Преобразуем минуты обратно в формат "ЧЧ:ММ"
             def minutes_to_time(minutes):
@@ -59,7 +60,7 @@ async def show_statistics(ctx: discord.ApplicationContext, bot):
             username = user.name
 
             # Добавляем строку в таблицу
-            table += f"{username:<16} | {minutes_to_time(avg_time):<13} | {minutes_to_time(latest_time):<14} | {minutes_to_time(earliest_time)}\n"
+            table += f"{username:<16} | {minutes_to_time(avg_time):<13} | {minutes_to_time(latest_time):<13} | {minutes_to_time(earliest_time):<12} | {minutes_to_time(median_time):<13}\n"
 
         table += "```"
         await ctx.respond(table)
