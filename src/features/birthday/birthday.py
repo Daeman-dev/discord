@@ -2,13 +2,14 @@ import sqlite3
 from datetime import datetime, timedelta
 
 from src.constants.roles_ids import BIRTHDAY_ROLE_ID
-from src.launcher.variables.local import bot, DATABASE_FILE
+from src.main.env_variables import DATABASE_FILE
 
 # Словарь для отслеживания, когда роль была выдана
 role_assignments = {}
 
+
 # Функция для проверки дней рождения и выдачи роли
-async def check_birthdays():
+async def check_birthdays(bot):
     today = datetime.now().strftime("%m-%d")  # Получаем текущую дату в формате "MM-DD"
     guild = bot.guilds[0]  # Предполагаем, что бот находится на одном сервере
 
@@ -34,8 +35,9 @@ async def check_birthdays():
             else:
                 print(f"Пользователь с ID {user_id[0]} не найден на сервере.")
 
+
 # Функция для снятия роли через 5 дней
-async def remove_birthday_roles():
+async def remove_birthday_roles(bot):
     guild = bot.guilds[0]  # Предполагаем, что бот находится на одном сервере
     birthday_role = guild.get_role(BIRTHDAY_ROLE_ID)
     if not birthday_role:
