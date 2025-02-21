@@ -1,6 +1,6 @@
 import sqlite3
 
-from src.launcher.variables.local import DATABASE_FILE
+from src.main.env_variables import DATABASE_FILE
 
 
 def init_db():
@@ -22,7 +22,7 @@ def init_db():
                 watched INTEGER DEFAULT 0
             )
         """)
-         # Таблица для времени пробуждения
+        # Таблица для времени пробуждения
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS wake_up_times (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
