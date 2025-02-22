@@ -3,7 +3,7 @@ version: '3.8'
 services:
   bot:
     build: .
-    container_name: discord-bot-V1.0
+    container_name: discord-bot-V2.0
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
       - BIRTHDAY_ROLE_ID=${BIRTHDAY_ROLE_ID}

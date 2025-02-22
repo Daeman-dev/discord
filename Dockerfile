@@ -14,4 +14,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Запускаем бота
-CMD ["python", "env_bot.py"]
+CMD ["python", "src/main/main.py"]

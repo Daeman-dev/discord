@@ -1,5 +1,9 @@
 import asyncio
 
+import os
+import sys
+sys.path.append(os.getcwd())
+
 import discord
 import schedule
 
