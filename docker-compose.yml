@@ -13,3 +13,4 @@ services:
     volumes:
       - ./data:/app/data  # Сохраняем данные SQLite на хосте
     restart: unless-stopped
+    
