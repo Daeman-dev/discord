@@ -377,7 +377,7 @@ async def send_weekly_statistics():
 # Задача для выполнения каждый день в определённое время
 def schedule_daily_tasks():
     # Укажите время в формате "HH:MM" (например, "09:00")
-    schedule.every().day.at("06:00").do(lambda: asyncio.create_task(send_mentions()))
+    schedule.every().day.at("09:00").do(lambda: asyncio.create_task(send_mentions()))
     schedule.every().day.at("00:00").do(lambda: asyncio.create_task(check_birthdays()))  # Проверка в полночь
     schedule.every().day.at("00:00").do(lambda: asyncio.create_task(remove_birthday_roles()))  # Проверка в полночь
     schedule.every().sunday.at("12:00").do(lambda: asyncio.create_task(send_weekly_statistics())) # Проверка на воскресенье и отправку статистики
