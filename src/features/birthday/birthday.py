@@ -1,3 +1,4 @@
+import os
 import sqlite3
 from datetime import datetime, timedelta
 
@@ -7,6 +8,7 @@ from src.main.env_variables import DATABASE_FILE
 # Словарь для отслеживания, когда роль была выдана
 role_assignments = {}
 
+BIRTHDAY_ROLE_ID = BIRTHDAY_ROLE_ID
 
 # Функция для проверки дней рождения и выдачи роли
 async def check_birthdays(bot):
