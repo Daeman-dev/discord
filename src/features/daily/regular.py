@@ -1,14 +1,16 @@
+import os
 import sqlite3
 from datetime import datetime, timedelta
 
-from src.constants import channels_ids, users_ids
 from src.main.env_variables import DATABASE_FILE
 
-USERS_TO_MENTION = [users_ids.DAEMAN_ID, users_ids.MATE_ID, users_ids.SANI4FOREVER_ID, users_ids.SINTETIK_ID]
 
+USERS_TO_MENTION = os.getenv("USERS_TO_MENTION")
+
+COLLOQUIUM_ID = os.getenv("COLLOQUIUM_ID")
 
 async def send_mentions(bot):
-    channel = bot.get_channel(channels_ids.COLLOQUIUM_ID)
+    channel = bot.get_channel(COLLOQUIUM_ID)
     if channel:
         mentions = " ".join([f"<@{user_id}>" for user_id in USERS_TO_MENTION])
         await channel.send(f"**Дейлик!** {mentions}")
@@ -18,7 +20,7 @@ async def send_weekly_statistics(bot):
     """
     Отправляет статистику пробуждений за неделю.
     """
-    channel = bot.get_channel(channels_ids.COLLOQUIUM_ID)  # Канал для отправки статистики
+    channel = bot.get_channel(COLLOQUIUM_ID)  # Канал для отправки статистики
     if not channel:
         print("Канал для статистики не найден!")
         return
