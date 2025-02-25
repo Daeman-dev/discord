@@ -7,7 +7,7 @@ services:
     environment:
       - BOT_TOKEN=${BOT_TOKEN}
       - BIRTHDAY_ROLE_ID=${BIRTHDAY_ROLE_ID}
-      - CHANNEL_ID=${CHANNEL_ID}
+      - COLLOQUIUM_ID=${COLLOQUIUM_ID}
       - USERS_TO_MENTION=${USERS_TO_MENTION}
       - DATABASE_FILE=${DATABASE_FILE}
     volumes:
