@@ -38,7 +38,7 @@ jobs:
       # Шаг 6: Проверить, что контейнеры запущены
       - name: Check running containers
         run: |
-          docker ps --filter "name=my_service" --format "{{.Status}}" | grep -q "Up"
+          docker ps --filter "name=discord-bot-V2.0" --format "{{.Status}}" | grep -q "Up"
 
       # Шаг 7: Проверить логи контейнера (опционально)
       - name: Check container logs
