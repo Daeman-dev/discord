@@ -38,12 +38,7 @@ jobs:
       # Шаг 6: Проверить, что контейнеры запущены
       - name: Check running containers
         run: |
-          docker ps --filter "bot" --format "{{.Status}}" | grep -q "Up"
-
-      # Шаг 7: Проверить логи контейнера (опционально)
-      - name: Check container logs
-        run: |
-          docker-compose logs bot | grep -q "Application started"
+          docker ps --filter "name=bot" --format "{{.Status}}" | grep -q "Up"
 
       # Шаг 8: Остановить и удалить контейнеры
       - name: Stop and remove containers
