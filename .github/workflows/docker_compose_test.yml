@@ -43,7 +43,7 @@ jobs:
       # Шаг 7: Проверить логи контейнера (опционально)
       - name: Check container logs
         run: |
-          docker-compose logs my_service | grep -q "Application started"
+          docker-compose logs discord-bot-V2.0 | grep -q "Application started"
 
       # Шаг 8: Остановить и удалить контейнеры
       - name: Stop and remove containers
