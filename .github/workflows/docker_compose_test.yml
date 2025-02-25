@@ -19,31 +19,31 @@ jobs:
 
       # Шаг 2: Установить Docker
       - name: Set up Docker
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-qemu-action@v2  # Устанавливаем Docker
 
-      # Шаг 3: Установить Docker Compose
+      # Шаг 3: Установить Docker Compose вручную
       - name: Set up Docker Compose
-        uses: docker/setup-compose-action@v2
-
-      # Шаг 4: Передать секретные переменные в ENV
-      - name: Set up environment variables
-        env:
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}  # Используем секрет из GitHub Secrets
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/download/v2.20.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+          docker-compose --version  # Проверяем установку 
 
       # Шаг 5: Запустить сборку и запуск контейнеров через docker-compose
       - name: Build and run Docker Compose
         run: |
           docker-compose -f docker-compose.yml up --build -d
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}  # Используем секрет из GitHub Secrets
 
       # Шаг 6: Проверить, что контейнеры запущены
       - name: Check running containers
         run: |
-          docker ps --filter "name=my_service" --format "{{.Status}}" | grep -q "Up"
+          docker ps --filter "name=discord-bot-V2.0" --format "{{.Status}}" | grep -q "Up"
 
       # Шаг 7: Проверить логи контейнера (опционально)
       - name: Check container logs
         run: |
-          docker-compose logs my_service | grep -q "Application started"
+          docker-compose logs discord-bot-V2.0 | grep -q "Application started"
 
       # Шаг 8: Остановить и удалить контейнеры
       - name: Stop and remove containers
