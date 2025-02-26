@@ -10,6 +10,7 @@ services:
       - COLLOQUIUM_ID=${COLLOQUIUM_ID}
       - USERS_TO_MENTION=${USERS_TO_MENTION}
       - DATABASE_FILE=${DATABASE_FILE}
+      - TZ=Europe/Minsk
     volumes:
       - ./data:/app/data  # Сохраняем данные SQLite на хосте
     restart: unless-stopped
