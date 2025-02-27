@@ -3,7 +3,10 @@ name: Run Tests
 on:
   push:
     branches:
-      - main  # Запускать тесты при пуше в ветку main
+      - main  # Запускать при пуше в ветку main
+  pull_request:
+    branches:
+      - main  # Запускать при создании пул-реквеста в ветку main
 
 jobs:
   test:
@@ -14,19 +17,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # Шаг 2: Установить Python 3.12
-      - name: Set up Python 3.12
+      # Шаг 2: Установить Python
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: '3.12'  # Укажите версию Python, которую использует ваш бот
 
       # Шаг 3: Установить зависимости
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
+          pip install pytest pytest-asyncio
 
       # Шаг 4: Запустить тесты
       - name: Run tests
         run: |
-          python -m pytest
+          python -m pytest tests/
