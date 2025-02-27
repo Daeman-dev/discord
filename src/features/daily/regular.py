@@ -11,7 +11,6 @@ USERS_TO_MENTION = [int(user) for user in os.getenv("USERS_TO_MENTION").split(',
 async def send_mentions(bot):
     channel = bot.get_channel(COLLOQUIUM_ID)
 
-    print(USERS_TO_MENTION)
     if channel:
         mentions = " ".join([f"<@{user_id}>" for user_id in USERS_TO_MENTION])
         await channel.send(f"**Дейлик!** {mentions}")
