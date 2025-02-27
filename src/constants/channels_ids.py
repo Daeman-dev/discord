@@ -1,3 +1,3 @@
 import os
 
-COLLOQUIUM_ID = os.getenv("COLLOQUIUM_ID")
+COLLOQUIUM_ID = int(os.getenv("COLLOQUIUM_ID"))

@@ -2,15 +2,15 @@ import os
 import sqlite3
 from datetime import datetime, timedelta
 
+from src.constants.channels_ids import COLLOQUIUM_ID
 from src.main.env_variables import DATABASE_FILE
 
 
-USERS_TO_MENTION = os.getenv("USERS_TO_MENTION")
-
-COLLOQUIUM_ID = os.getenv("COLLOQUIUM_ID")
+USERS_TO_MENTION = [int(user) for user in os.getenv("USERS_TO_MENTION").split(',')]
 
 async def send_mentions(bot):
     channel = bot.get_channel(COLLOQUIUM_ID)
+
     if channel:
         mentions = " ".join([f"<@{user_id}>" for user_id in USERS_TO_MENTION])
         await channel.send(f"**Дейлик!** {mentions}")
