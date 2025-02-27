@@ -8,7 +8,7 @@ from src.main.env_variables import DATABASE_FILE
 
 
 @pytest.fixture
-def setup_db(monkeypatch):
+def setup_db():
     conn = sqlite3.connect(DATABASE_FILE)
     cursor = conn.cursor()
     cursor.execute("""
